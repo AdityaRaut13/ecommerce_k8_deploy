@@ -4,11 +4,7 @@ const { DB_URL } = require('../config');
 module.exports = async() => {
 
     try {
-        await mongoose.connect("mongodb://localhost:27017/product-ms", {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-       
-        });
+        await mongoose.connect(`${encodeURI(DB_URL)}`);
         console.log('Db Connected');
         
     } catch (error) {
