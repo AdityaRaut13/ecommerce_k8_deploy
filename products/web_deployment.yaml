@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-service
+  namespace: product
+spec:
+  selector:
+    app: web_service
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-deploy 
+  labels:
+    app: web_service
+  namespace: product
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web_service
+  template:
+    metadata:
+      labels:
+        app: web_service
+    spec:
+      containers:
+      - name: web-container
+        image: adityaraut/products:latest
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "1"
+        env:
+          - name: PORT
+            value: "3000"
+          - name: DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: db-credentials
+                key: db_user
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: db-credentials
+                key: db_password
+          - name: DB_DOMAIN
+            valueFrom:
+              configMapKeyRef:
+                name: config
+                key: db_domain
+        ports:
+        - containerPort: 3000

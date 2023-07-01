@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+data:
+  customer: web-service.customer
+  product: web-service.product
+  shopping: web-service.shopping

@@ -1,0 +1,55 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-service
+spec:
+  selector:
+    app: shopping_web
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-deploy
+  labels:
+    app: shopping_web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shopping_web
+  template:
+    metadata:
+      labels:
+        app: shopping_web
+    spec:
+      containers:
+      - name: web-container
+        image: adityaraut/shopping:latest
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "1"
+        env:
+          - name: PORT
+            value: "3000"
+          - name: DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: db-credentials
+                key: db_user
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: db-credentials
+                key: db_password
+          - name: DB_DOMAIN
+            valueFrom:
+              configMapKeyRef:
+                name: config
+                key: db_domain
+        ports:
+        - containerPort: 3000

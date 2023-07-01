@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway-service 
+spec:
+  selector:
+    app: web_service
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-deploy 
+  labels:
+    app: web_service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web_service
+  template:
+    metadata:
+      labels:
+        app: web_service
+    spec:
+      containers:
+      - name: web-container
+        image: adityaraut/gateway:latest
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "1"
+        env:
+          - name: PORT
+            value: "3000"
+          - name: CUSTOMER
+            valueFrom:
+              configMapKeyRef:
+                name: config 
+                key: customer
+          - name: SHOPPING
+            valueFrom:
+              configMapKeyRef:
+                name: config 
+                key: shopping
+          - name: PRODUCT
+            valueFrom:
+              configMapKeyRef:
+                name: config 
+                key: product
+        ports:
+        - containerPort: 3000
